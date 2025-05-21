@@ -11,6 +11,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
   
-  // Redirect to the home page
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  // Redirect to the PromptCraft Analyzer page after successful sign-in
+  return NextResponse.redirect(new URL('/promptcraft-analyzer', requestUrl.origin));
 } 

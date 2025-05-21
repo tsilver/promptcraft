@@ -22,7 +22,11 @@ interface EvaluationData {
   suggestedRefinements: string[];
 }
 
-export default function PromptInput() {
+interface PromptInputProps {
+  initialPrompt?: string | null;
+}
+
+export default function PromptInput({ initialPrompt = null }: PromptInputProps) {
   const [promptText, setPromptText] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -40,6 +44,13 @@ export default function PromptInput() {
       setShowLoginPrompt(false);
     }
   }, [user]);
+  
+  // Initialize prompt text from prop if provided
+  useEffect(() => {
+    if (initialPrompt) {
+      setPromptText(initialPrompt);
+    }
+  }, [initialPrompt]);
   
   // Function for evaluating prompt
   const handleEvaluate = async () => {

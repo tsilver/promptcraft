@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useEventTracking } from '@/lib/tracking/hooks';
 import { EventType, EventCategory } from '@/lib/tracking/types';
 import Link from 'next/link';
+import AIxLayout from '@/components/AIxLayout';
 
 export default function TestGeminiPage() {
   const [prompt, setPrompt] = useState('');
@@ -79,22 +80,24 @@ export default function TestGeminiPage() {
   };
   
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Gemini API Test</h1>
-        <Link href="/example-prompts" className="text-indigo-600 hover:text-indigo-800">
+    <AIxLayout
+      title="Gemini API Test"
+      subtitle="Test the Gemini API with your prompts"
+    >
+      <div className="mb-6 flex justify-end">
+        <Link href="/example-prompts" className="text-aixblue-600 hover:text-aixblue-800">
           Back to Examples
         </Link>
       </div>
       
-      <form onSubmit={handleSubmit} className="mb-8">
+      <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-sm">
         <div className="mb-4">
           <label htmlFor="prompt" className="block text-sm font-medium text-gray-700 mb-1">
             Test Prompt
           </label>
           <textarea 
             id="prompt"
-            className="w-full border border-gray-300 rounded-md shadow-sm p-3"
+            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-aixblue-500 focus:border-aixblue-500"
             rows={4}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -105,7 +108,7 @@ export default function TestGeminiPage() {
         <button 
           type="submit"
           disabled={!prompt.trim() || loading}
-          className={`px-4 py-2 rounded ${loading || !prompt.trim() ? 'bg-indigo-300' : 'bg-indigo-600 hover:bg-indigo-700'} text-white font-medium`}
+          className={`px-4 py-2 rounded ${loading || !prompt.trim() ? 'bg-aixblue-300' : 'bg-aixblue-600 hover:bg-aixblue-700'} text-white font-medium`}
         >
           {loading ? 'Testing...' : 'Test Prompt'}
         </button>
@@ -118,7 +121,7 @@ export default function TestGeminiPage() {
       )}
       
       {result && (
-        <div className="mb-6">
+        <div className="mb-6 bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-3">Result:</h2>
           <div className="p-4 bg-gray-50 border rounded-md whitespace-pre-wrap">
             {result}
@@ -126,12 +129,12 @@ export default function TestGeminiPage() {
         </div>
       )}
       
-      <div className="bg-yellow-50 p-4 border border-yellow-100 rounded-md">
-        <h3 className="font-medium text-yellow-800 mb-2">Event Tracking Demo</h3>
-        <p className="text-yellow-700 text-sm">
+      <div className="bg-aixblue-50 p-4 border border-aixblue-100 rounded-md">
+        <h3 className="font-medium text-aixblue-800 mb-2">Event Tracking Demo</h3>
+        <p className="text-aixblue-700 text-sm">
           This page demonstrates LLM interaction tracking. Open your browser console to see the events being tracked.
         </p>
       </div>
-    </div>
+    </AIxLayout>
   );
 } 

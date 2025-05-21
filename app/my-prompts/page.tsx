@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import AuthRequired from '@/components/AuthRequired';
+import AIxLayout from '@/components/AIxLayout';
 
 interface Prompt {
   id: string;
@@ -118,86 +119,86 @@ export default function MyPrompts() {
   
   return (
     <AuthRequired>
-      <main className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">My Prompts</h1>
+      <AIxLayout
+        title="My Prompts"
+        subtitle="Access, edit, and reuse your saved prompts"
+      >
+        <div className="flex justify-end mb-6">
+          <Link 
+            href="/"
+            className="px-4 py-2 bg-aixblue-600 text-white rounded-md hover:bg-aixblue-700 font-medium transition-colors"
+          >
+            Create New Prompt
+          </Link>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-aixblue-600"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        ) : prompts.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <p className="text-gray-600 mb-4">You don't have any saved prompts yet.</p>
             <Link 
               href="/"
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-aixblue-600 hover:text-aixblue-800 font-medium"
             >
-              Create New Prompt →
+              Create your first prompt →
             </Link>
           </div>
-          
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          ) : prompts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-600 mb-4">You don't have any saved prompts yet.</p>
-              <Link 
-                href="/"
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
-              >
-                Create your first prompt →
-              </Link>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <ul className="divide-y divide-gray-200">
-                {prompts.map((prompt) => (
-                  <li key={prompt.id} className="p-4 hover:bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          {prompt.isFavorite && (
-                            <span className="mr-2 text-yellow-500">★</span>
-                          )}
-                          <h3 className="font-medium text-gray-900 truncate">
-                            {prompt.promptText.length > 60
-                              ? `${prompt.promptText.substring(0, 60)}...`
-                              : prompt.promptText}
-                          </h3>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Updated {formatDate(prompt.updatedAt)} • Version {prompt.version}
-                        </p>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <ul className="divide-y divide-gray-200">
+              {prompts.map((prompt) => (
+                <li key={prompt.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-1">
+                        {prompt.isFavorite && (
+                          <span className="mr-2 text-yellow-500">★</span>
+                        )}
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {prompt.promptText.length > 60
+                            ? `${prompt.promptText.substring(0, 60)}...`
+                            : prompt.promptText}
+                        </h3>
                       </div>
-                      <div className="flex ml-4 space-x-2">
-                        <button 
-                          onClick={() => toggleFavorite(prompt.id)}
-                          className="text-gray-400 hover:text-yellow-500"
-                          aria-label={prompt.isFavorite ? "Remove from favorites" : "Add to favorites"}
-                        >
-                          {prompt.isFavorite ? '★' : '☆'}
-                        </button>
-                        <Link 
-                          href={`/?promptId=${prompt.id}`}
-                          className="text-indigo-600 hover:text-indigo-800"
-                        >
-                          Use
-                        </Link>
-                        <button 
-                          onClick={() => deletePrompt(prompt.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      <p className="text-sm text-gray-500">
+                        Updated {formatDate(prompt.updatedAt)} • Version {prompt.version}
+                      </p>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </main>
+                    <div className="flex ml-4 space-x-2">
+                      <button 
+                        onClick={() => toggleFavorite(prompt.id)}
+                        className="text-gray-400 hover:text-yellow-500"
+                        aria-label={prompt.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        {prompt.isFavorite ? '★' : '☆'}
+                      </button>
+                      <Link 
+                        href={`/?promptId=${prompt.id}`}
+                        className="text-aixblue-600 hover:text-aixblue-800"
+                      >
+                        Use
+                      </Link>
+                      <button 
+                        onClick={() => deletePrompt(prompt.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </AIxLayout>
     </AuthRequired>
   );
 } 

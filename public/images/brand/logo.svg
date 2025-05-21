@@ -1,0 +1,11 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="60" height="60" rx="8" fill="#0870CC"/>
+  
+  <!-- AI Symbol -->
+  <path d="M15 18H25L30 42L35 18H45" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- x Symbol -->
+  <path d="M22 45L38 32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M22 32L38 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>

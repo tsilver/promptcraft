@@ -8,7 +8,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        indigo: {
+        // AIxponential primary colors
+        aixblue: {
+          50: '#f0f7ff',
+          100: '#e0eefe',
+          200: '#bae0fd',
+          300: '#81c8fb',
+          400: '#42aaf7',
+          500: '#1a8eed',
+          600: '#0870cc',
+          700: '#0959a6',
+          800: '#0b4d89',
+          900: '#0e4072',
+          950: '#0a2847',
+        },
+        aixindigo: {
           50: '#eef2ff',
           100: '#e0e7ff',
           200: '#c7d2fe',
@@ -19,6 +33,7 @@ module.exports = {
           700: '#4338ca',
           800: '#3730a3',
           900: '#312e81',
+          950: '#1e1b4b',
         },
       },
       typography: (theme) => ({
@@ -27,7 +42,7 @@ module.exports = {
             color: theme('colors.gray.700'),
             maxWidth: '100%',
             code: {
-              color: theme('colors.indigo.600'),
+              color: theme('colors.aixblue.600'),
               backgroundColor: theme('colors.gray.100'),
               borderRadius: '0.25rem',
               padding: '0.2em 0.4em',
