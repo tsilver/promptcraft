@@ -1,22 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useEventTracking } from '@/lib/tracking/hooks';
 import { EventType, EventCategory } from '@/lib/tracking/types';
 import PromptEvaluation from './PromptEvaluation';
 import PromptResult from './PromptResult';
+import { mockEvaluation, mockExecutionResult, loginPromotionMessage } from '@/lib/mockData';
+
+// Define evaluation data structure to match our component props
+interface EvaluationCriterion {
+  score: string;
+  feedback: string;
+}
+
+interface EvaluationData {
+  tonePersona: EvaluationCriterion;
+  taskClarity: EvaluationCriterion;
+  formatOutput: EvaluationCriterion;
+  contextBackground: EvaluationCriterion;
+  suggestedRefinements: string[];
+}
 
 export default function PromptInput() {
   const [promptText, setPromptText] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [evaluationData, setEvaluationData] = useState(null);
-  const [resultData, setResultData] = useState(null);
+  const [evaluationData, setEvaluationData] = useState<EvaluationData | null>(null);
+  const [resultData, setResultData] = useState<string | null>(null);
   const [activeDisplay, setActiveDisplay] = useState<'none' | 'evaluation' | 'result'>('none');
-  const { user } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { user, signIn, isLoading } = useAuth();
   const { trackLLMEvent } = useEventTracking({ debug: true });
+  
+  // Reset login prompt on user change
+  useEffect(() => {
+    if (user) {
+      setShowLoginPrompt(false);
+    }
+  }, [user]);
   
   // Function for evaluating prompt
   const handleEvaluate = async () => {
@@ -34,26 +57,36 @@ export default function PromptInput() {
         action: 'evaluate',
         source: 'prompt-input',
         interface: 'evaluation-tool',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isAuthenticated: !!user
       }
     });
     
     try {
-      const response = await fetch('/api/prompts/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          promptText,
-          userId: user?.id // Include user ID if available
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to evaluate prompt');
+      if (user) {
+        // Real API call for logged-in users
+        const response = await fetch('/api/prompts/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            promptText,
+            userId: user.id
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to evaluate prompt');
+        }
+        
+        const data = await response.json();
+        setEvaluationData(data.evaluation);
+      } else {
+        // Simulated response for non-logged-in users
+        // Add a delay to simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setEvaluationData(mockEvaluation);
+        setShowLoginPrompt(true);
       }
-      
-      const data = await response.json();
-      setEvaluationData(data.evaluation);
     } catch (error) {
       console.error('Error evaluating prompt:', error);
     } finally {
@@ -77,39 +110,65 @@ export default function PromptInput() {
         action: 'execute',
         source: 'prompt-input',
         interface: 'execution-tool',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isAuthenticated: !!user
       }
     });
     
     try {
-      const response = await fetch('/api/prompts/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          promptText,
-          userId: user?.id // Include user ID if available
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to execute prompt');
-      }
-      
-      const data = await response.json();
-      setResultData(data.result);
-      
-      // Track response received event
-      trackLLMEvent(EventType.LLM_RESPONSE, {
-        eventCategory: EventCategory.LLM_INTERACTION,
-        prompt: promptText,
-        response: data.result.resultText,
-        metadata: {
-          action: 'received',
-          responseLength: data.result.resultText.length,
-          source: 'prompt-input',
-          timestamp: new Date().toISOString()
+      if (user) {
+        // Real API call for logged-in users
+        const response = await fetch('/api/prompts/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            promptText,
+            userId: user.id
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to execute prompt');
         }
-      });
+        
+        const data = await response.json();
+        setResultData(data.result);
+        
+        // Track response received event
+        trackLLMEvent(EventType.LLM_RESPONSE, {
+          eventCategory: EventCategory.LLM_INTERACTION,
+          prompt: promptText,
+          response: data.result,
+          metadata: {
+            action: 'received',
+            responseLength: typeof data.result === 'string' ? data.result.length : 0,
+            source: 'prompt-input',
+            timestamp: new Date().toISOString(),
+            isAuthenticated: true
+          }
+        });
+      } else {
+        // Simulated response for non-logged-in users
+        // Add a delay to simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        setResultData(mockExecutionResult);
+        setShowLoginPrompt(true);
+        
+        // Track mock response event
+        trackLLMEvent(EventType.LLM_RESPONSE, {
+          eventCategory: EventCategory.LLM_INTERACTION,
+          prompt: promptText,
+          response: 'mock_response',
+          metadata: {
+            action: 'received',
+            responseLength: mockExecutionResult.length,
+            source: 'prompt-input',
+            timestamp: new Date().toISOString(),
+            isAuthenticated: false,
+            isMockResponse: true
+          }
+        });
+      }
     } catch (error) {
       console.error('Error executing prompt:', error);
     } finally {
@@ -123,7 +182,8 @@ export default function PromptInput() {
     
     // Check if user is logged in
     if (!user) {
-      alert('Please sign in to save prompts');
+      // Show login dialog
+      setShowLoginPrompt(true);
       return;
     }
     
@@ -154,7 +214,8 @@ export default function PromptInput() {
           action: 'save',
           promptId: data.promptId,
           source: 'prompt-input',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          isAuthenticated: true
         }
       });
     } catch (error) {
@@ -167,6 +228,20 @@ export default function PromptInput() {
   
   return (
     <div className="space-y-4">
+      {showLoginPrompt && !user && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-md p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between">
+          <p className="text-indigo-800 mb-3 sm:mb-0">
+            {loginPromotionMessage}
+          </p>
+          <button
+            onClick={signIn}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      )}
+      
       <div>
         <label 
           htmlFor="prompt" 
@@ -187,9 +262,9 @@ export default function PromptInput() {
       <div className="flex flex-wrap gap-3">
         <button
           onClick={handleEvaluate}
-          disabled={isEvaluating || !promptText.trim()}
+          disabled={isEvaluating || !promptText.trim() || isLoading}
           className={`px-4 py-2 rounded-md font-medium text-white ${
-            isEvaluating || !promptText.trim()
+            isEvaluating || !promptText.trim() || isLoading
               ? 'bg-indigo-300 cursor-not-allowed'
               : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
           }`}
@@ -199,9 +274,9 @@ export default function PromptInput() {
         
         <button
           onClick={handleExecute}
-          disabled={isExecuting || !promptText.trim()}
+          disabled={isExecuting || !promptText.trim() || isLoading}
           className={`px-4 py-2 rounded-md font-medium text-white ${
-            isExecuting || !promptText.trim()
+            isExecuting || !promptText.trim() || isLoading
               ? 'bg-green-300 cursor-not-allowed'
               : 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
           }`}
@@ -211,15 +286,17 @@ export default function PromptInput() {
         
         <button
           onClick={handleSave}
-          disabled={isSaving || !promptText.trim() || !user}
-          className={`px-4 py-2 rounded-md font-medium text-gray-700 ${
-            isSaving || !promptText.trim() || !user
-              ? 'bg-gray-200 cursor-not-allowed'
-              : 'bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
-          }`}
+          disabled={isSaving || !promptText.trim() || isLoading}
+          className={`px-4 py-2 rounded-md font-medium ${
+            isSaving || !promptText.trim() || isLoading
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : user 
+                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+          } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500`}
           title={!user ? 'Sign in to save prompts' : 'Save this prompt'}
         >
-          {isSaving ? 'Saving...' : 'Save Prompt'}
+          {isSaving ? 'Saving...' : !user ? 'Sign In to Save' : 'Save Prompt'}
         </button>
       </div>
       

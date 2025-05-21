@@ -6,18 +6,19 @@ import { useAuth } from '@/lib/auth';
 
 interface AuthRequiredProps {
   children: ReactNode;
+  redirectTo?: string;
 }
 
-export default function AuthRequired({ children }: AuthRequiredProps) {
-  const { user, isLoading } = useAuth();
+export default function AuthRequired({ children, redirectTo }: AuthRequiredProps) {
+  const { user, isLoading, signIn } = useAuth();
   const router = useRouter();
   
   useEffect(() => {
-    // If auth is loaded and there's no user, redirect to home
-    if (!isLoading && !user) {
-      router.push('/');
+    // Only redirect if redirectTo is specified and there's no user
+    if (!isLoading && !user && redirectTo) {
+      router.push(redirectTo);
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, redirectTo]);
   
   // Show loading state while checking auth
   if (isLoading) {
@@ -33,16 +34,24 @@ export default function AuthRequired({ children }: AuthRequiredProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Authentication Required</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Sign In Required</h2>
           <p className="text-gray-600 mb-6">
-            You need to be signed in to access this page. Please sign in to continue.
+            This feature requires a Google account to access your personal data and saved prompts.
           </p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Go to Home Page
-          </button>
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 justify-center">
+            <button
+              onClick={signIn}
+              className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Sign In with Google
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
     );
