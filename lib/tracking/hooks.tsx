@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useCallback, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/nextauth';
 import { EventManager } from './EventManager';
 import { 
   EventType, 
@@ -49,6 +49,43 @@ const generateSessionId = (): string => {
   return newSessionId;
 };
 
+// Generate or retrieve a persistent anonymous ID
+const getAnonymousId = (): string => {
+  if (typeof window === 'undefined') return 'server';
+  
+  // Try to get from cookie first
+  const cookies = document.cookie.split(';');
+  const anonymousIdCookie = cookies.find(cookie => cookie.trim().startsWith('anonymous_id='));
+  
+  if (anonymousIdCookie) {
+    return anonymousIdCookie.split('=')[1].trim();
+  }
+  
+  // If not in cookie, try localStorage
+  const storedId = localStorage.getItem('anonymous_tracking_id');
+  if (storedId) {
+    // Also set as cookie for cross-session tracking
+    setAnonymousIdCookie(storedId);
+    return storedId;
+  }
+  
+  // Create new ID if not found
+  const newId = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  localStorage.setItem('anonymous_tracking_id', newId);
+  setAnonymousIdCookie(newId);
+  
+  return newId;
+};
+
+// Set the anonymous ID as a cookie with 1-year expiration
+const setAnonymousIdCookie = (id: string): void => {
+  if (typeof window === 'undefined') return;
+  
+  const expiration = new Date();
+  expiration.setFullYear(expiration.getFullYear() + 1);
+  document.cookie = `anonymous_id=${id}; expires=${expiration.toUTCString()}; path=/; SameSite=Lax`;
+};
+
 // Provider component for event tracking
 export interface EventTrackingProviderProps {
   children: ReactNode;
@@ -62,6 +99,7 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
   const { user } = useAuth();
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
+  const [anonymousId, setAnonymousId] = useState<string>('');
   const [manager, setManager] = useState<EventManager | null>(null);
   const [pathname, setPathname] = useState<string>('');
   
@@ -70,6 +108,7 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
     const eventManager = EventManager.getInstance(config);
     setManager(eventManager);
     setSessionId(generateSessionId());
+    setAnonymousId(getAnonymousId());
     
     // Clean up when component unmounts
     return () => {
@@ -110,11 +149,12 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
         metadata: {
           path: currentPath,
           referrer: document.referrer,
-          query: {} // In Next.js App Router, you'd need a different approach here
+          query: {}, // In Next.js App Router, you'd need a different approach here
+          anonymousId: !user?.id ? anonymousId : undefined // Include anonymous ID for non-authenticated users
         }
       }
     );
-  }, [manager, pathname, sessionId, user]);
+  }, [manager, pathname, sessionId, user, anonymousId]);
   
   // Track generic events
   const trackEvent = useCallback(async (
@@ -128,10 +168,14 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
       {
         ...eventData,
         userId: user?.id,
-        sessionId
+        sessionId,
+        metadata: {
+          ...eventData.metadata,
+          anonymousId: !user?.id ? anonymousId : undefined // Include anonymous ID for non-authenticated users
+        }
       }
     );
-  }, [manager, user, sessionId]);
+  }, [manager, user, sessionId, anonymousId]);
   
   // Track course-specific events
   const trackCourseEvent = useCallback(async (
@@ -145,10 +189,14 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
       {
         ...eventData,
         userId: user?.id,
-        sessionId
+        sessionId,
+        metadata: {
+          ...eventData.metadata,
+          anonymousId: !user?.id ? anonymousId : undefined // Include anonymous ID for non-authenticated users
+        }
       }
     );
-  }, [manager, user, sessionId]);
+  }, [manager, user, sessionId, anonymousId]);
   
   // Track LLM interaction events
   const trackLLMEvent = useCallback(async (
@@ -163,10 +211,14 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
         ...eventData,
         eventCategory: EventCategory.LLM_INTERACTION,
         userId: user?.id,
-        sessionId
+        sessionId,
+        metadata: {
+          ...eventData.metadata,
+          anonymousId: !user?.id ? anonymousId : undefined // Include anonymous ID for non-authenticated users
+        }
       }
     );
-  }, [manager, user, sessionId]);
+  }, [manager, user, sessionId, anonymousId]);
   
   // Track proficiency assessment events
   const trackProficiencyEvent = useCallback(async (
@@ -181,10 +233,14 @@ export const EventTrackingProvider: React.FC<EventTrackingProviderProps> = ({
         ...eventData,
         eventCategory: EventCategory.PROFICIENCY,
         userId: user?.id,
-        sessionId
+        sessionId,
+        metadata: {
+          ...eventData.metadata,
+          anonymousId: !user?.id ? anonymousId : undefined // Include anonymous ID for non-authenticated users
+        }
       }
     );
-  }, [manager, user, sessionId]);
+  }, [manager, user, sessionId, anonymousId]);
   
   return (
     <EventTrackingContext.Provider 

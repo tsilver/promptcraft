@@ -114,6 +114,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           await ensureUserInDatabase(userData);
           setUser(userData);
+          
+          // Register anonymous tracking ID if available
+          registerAnonymousTracking(session.user.id);
         } else {
           setUser(null);
         }
@@ -147,6 +150,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error('Error ensuring user in database:', error);
+    }
+  };
+  
+  // Register anonymous tracking ID with user account
+  const registerAnonymousTracking = async (userId: string) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      // Get anonymous ID from cookie
+      const cookies = document.cookie.split(';');
+      const anonymousIdCookie = cookies.find(cookie => cookie.trim().startsWith('anonymous_id='));
+      let anonymousId = '';
+      
+      if (anonymousIdCookie) {
+        anonymousId = anonymousIdCookie.split('=')[1].trim();
+      } else {
+        // Try localStorage as a fallback
+        anonymousId = localStorage.getItem('anonymous_tracking_id') || '';
+      }
+      
+      if (!anonymousId) return; // No anonymous ID to register
+      
+      // Register the anonymous ID with this user account
+      const response = await fetch('/api/tracking/register-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          anonymousId
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to register anonymous tracking ID');
+      }
+    } catch (error) {
+      console.error('Error registering anonymous tracking ID:', error);
     }
   };
   

@@ -1,7 +1,8 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { AuthProvider } from '@/lib/auth';
+import { SessionProvider } from 'next-auth/react';
 import { EventTrackingProvider } from '@/lib/tracking/hooks';
+import { AuthProvider } from '@/lib/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -9,6 +10,8 @@ export const metadata = {
   title: 'AI PromptCraft Analyzer',
   description: 'Analyze, evaluate, and improve your AI prompts for education',
 };
+
+import ClientLayout from '@/components/ClientLayout';
 
 export default function RootLayout({
   children,
@@ -18,11 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <EventTrackingProvider>
-            {children}
-          </EventTrackingProvider>
-        </AuthProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

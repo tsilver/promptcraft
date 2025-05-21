@@ -1,48 +1,81 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useState, Suspense } from 'react';
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import AIxLayout from '@/components/AIxLayout';
 
-export default function SignInPage() {
-  const { user, signIn, isLoading } = useAuth();
-  const router = useRouter();
+function SignInContent() {
+  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/';
   
-  // Redirect authenticated users to the analyzer page
-  useEffect(() => {
-    if (user && !isLoading) {
-      router.push('/promptcraft-analyzer');
-    }
-  }, [user, isLoading, router]);
-  
-  // Auto-trigger sign in
-  useEffect(() => {
-    if (!user && !isLoading) {
-      signIn();
-    }
-  }, [user, isLoading, signIn]);
-  
+  const handleSignIn = async () => {
+    setIsLoading(true);
+    await signIn('google', { callbackUrl });
+  };
+
   return (
-    <AIxLayout
-      title="Sign In"
-      subtitle="Sign in to access the PromptCraft Analyzer"
-    >
-      <div className="flex items-center justify-center py-12">
-        <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aixblue-600 mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Redirecting to Sign In</h2>
-          <p className="text-gray-600 mb-6">
-            You're being redirected to the authentication provider. If nothing happens, click the button below.
-          </p>
+    <div className="my-12 max-w-3xl mx-auto px-4">
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Sign In</h1>
+        
+        <p className="text-gray-600 mb-8 text-lg">
+          Sign in to access the AI PromptCraft Analyzer tool.
+        </p>
+        
+        <div className="flex flex-col items-center">
           <button
-            onClick={signIn}
-            className="px-6 py-3 bg-aixblue-600 text-white font-medium rounded-md hover:bg-aixblue-700 transition-colors"
+            onClick={handleSignIn}
+            disabled={isLoading}
+            className="flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors w-full max-w-sm"
           >
-            Sign In with Google
+            {isLoading ? (
+              <div className="animate-spin h-5 w-5 border-2 border-aixblue-600 border-t-transparent rounded-full" />
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+                Sign in with Google
+              </>
+            )}
           </button>
+          
+          <div className="mt-6">
+            <Link href="/" className="text-aixblue-600 hover:text-aixblue-700 font-medium">
+              Return to homepage
+            </Link>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <AIxLayout title="Sign In" subtitle="Sign in to access the AI PromptCraft Analyzer">
+      <Suspense fallback={<div className="my-12 max-w-3xl mx-auto px-4 text-center">Loading...</div>}>
+        <SignInContent />
+      </Suspense>
     </AIxLayout>
   );
 } 

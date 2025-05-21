@@ -44,20 +44,35 @@ model VerificationToken {
 
 // User model 
 model User {
-  id             String          @id @default(cuid())
-  name           String?
-  email          String?         @unique
-  emailVerified  DateTime?
-  image          String?
-  accounts       Account[]
-  assessments    Assessment[]
-  courseAccess   CourseAccess[]
-  feedback       Feedback[]
-  sessions       Session[]
-  trackingEvents TrackingEvent[]
-  prompts        Prompt[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                     String                   @id @default(cuid())
+  name                   String?
+  email                  String?                  @unique
+  emailVerified          DateTime?
+  image                  String?
+  accounts               Account[]
+  assessments            Assessment[]
+  courseAccess           CourseAccess[]
+  feedback               Feedback[]
+  sessions               Session[]
+  trackingEvents         TrackingEvent[]
+  prompts                Prompt[]
+  anonymousTrackingProfiles AnonymousTrackingProfile[]
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+}
+
+// New model to track anonymous users across sessions
+model AnonymousTrackingProfile {
+  id                String    @id @default(cuid())
+  anonymousId       String    @unique // Cookie-based anonymousId
+  userId            String?   // User ID when the anonymous user signs in
+  firstSeen         DateTime  @default(now())
+  lastSeen          DateTime  @default(now())
+  metadata          Json?     // Additional info about this anonymous user (browser, etc.)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([anonymousId])
+  @@index([userId])
 }
 
 // Course related models

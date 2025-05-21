@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/nextauth';
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);

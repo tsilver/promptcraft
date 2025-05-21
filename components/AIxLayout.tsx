@@ -3,7 +3,7 @@
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/nextauth';
 import MobileNav from './MobileNav';
 
 interface AIxLayoutProps {
@@ -70,18 +70,28 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
                 <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
               ) : user ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">{user.name || user.email}</span>
+                  {user.image && (
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={user.image}
+                        alt="User profile"
+                        width={32}
+                        height={32}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
                   <button
-                    onClick={() => signOut()}
-                    className="px-4 py-2 text-sm font-medium rounded-md text-aixblue-600 border border-aixblue-600 hover:bg-aixblue-50 transition duration-150"
+                    onClick={signOut}
+                    className="px-4 py-2 rounded-md bg-white text-aixblue-600 border border-aixblue-600 hover:bg-aixblue-50 transition-colors"
                   >
                     Sign Out
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => signIn()}
-                  className="px-4 py-2 text-sm font-medium rounded-md bg-aixblue-600 text-white hover:bg-aixblue-700 transition duration-150"
+                  onClick={signIn}
+                  className="px-4 py-2 rounded-md bg-aixblue-600 text-white hover:bg-aixblue-700 transition-colors"
                 >
                   Sign In
                 </button>
