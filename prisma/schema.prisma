@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Auth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// User model 
+model User {
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  assessments    Assessment[]
+  courseAccess   CourseAccess[]
+  feedback       Feedback[]
+  sessions       Session[]
+  trackingEvents TrackingEvent[]
+  prompts        Prompt[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+// Course related models
+model Course {
+  id             String          @id @default(cuid())
+  name           String
+  version        String
+  description    String
+  isActive       Boolean         @default(true)
+  assessments    Assessment[]
+  courseAccess   CourseAccess[]
+  feedback       Feedback[]
+  trackingEvents TrackingEvent[]
+}
+
+model CourseAccess {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  firstAccess DateTime @default(now())
+  lastAccess  DateTime @default(now())
+  course      Course   @relation(fields: [courseId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Assessment {
+  id                String   @id @default(cuid())
+  userId            String
+  assessmentType    String
+  courseId          String
+  promptEngineering Int?
+  promptStructure   Int?
+  createMaterials   Int?
+  troubleshooting   Int?
+  teachingAI        Int?
+  interestAreas     String?
+  submittedAt       DateTime @default(now())
+  course            Course   @relation(fields: [courseId], references: [id])
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, assessmentType])
+}
+
+/// Tracking events for course interactions
+model TrackingEvent {
+  id            String    @id @default(cuid())
+  userId        String    
+  sessionId     String    // To group related events
+  eventCategory String    // Category of event (NAVIGATION, ASSESSMENT, etc.)
+  eventType     String    // Specific event type
+  courseId      String?
+  moduleId      String?   // Module identifier
+  lessonId      String?   // Lesson identifier
+  courseVersion String?   // Course version
+  contentType   String?   // Type of content being interacted with
+  source        String?   // Source of the event (browser, device, etc.)
+  userAgent     String?   // User agent string
+  ipAddress     String?   // IP address
+  metadata      Json      // Flexible JSON metadata
+  createdAt     DateTime  @default(now())
+  course        Course?   @relation(fields: [courseId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([sessionId])
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  type       String
+  message    String
+  email      String
+  userId     String?
+  courseId   String?
+  status     String   @default("new")
+  adminNotes String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  course     Course?  @relation(fields: [courseId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Prompt engineering models
+model Prompt {
+  id            String            @id @default(cuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptText    String
+  version       Int               @default(1)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  isFavorite    Boolean           @default(false)
+  evaluations   PromptEvaluation[]
+  results       PromptResult[]
+}
+
+// Prompt evaluation results
+model PromptEvaluation {
+  id             String   @id @default(cuid())
+  promptId       String
+  prompt         Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  evaluationData Json     // Stores feedback for Tone, Task, Format, Context, Refinements
+  evaluatedAt    DateTime @default(now())
+}
+
+// Results from executing a prompt
+model PromptResult {
+  id          String   @id @default(cuid())
+  promptId    String
+  prompt      Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  resultText  String
+  generatedAt DateTime @default(now())
+}
+
+// Learning resources for prompt engineering
+model LearningResource {
+  id          String   @id @default(cuid())
+  title       String
+  url         String
+  description String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
