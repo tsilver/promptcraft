@@ -13,13 +13,15 @@ import { mockEvaluation, mockExecutionResult, loginPromotionMessage } from '@/li
 interface EvaluationCriterion {
   score: string;
   feedback: string;
+  learnMoreUrl?: string;
 }
 
 interface EvaluationData {
   tonePersona: EvaluationCriterion;
-  taskClarity: EvaluationCriterion;
-  formatOutput: EvaluationCriterion;
-  contextBackground: EvaluationCriterion;
+  explicitTask: EvaluationCriterion;
+  arrangementOutput: EvaluationCriterion;
+  contextConstraints: EvaluationCriterion;
+  higherLevelRefinements: EvaluationCriterion;
   suggestedRefinements: string[];
 }
 
