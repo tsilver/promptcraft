@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { BaseEvent } from '@/lib/tracking/types';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth-options';
 
 // Anonymous user ID to use for events without a valid user ID
 const ANONYMOUS_USER_ID = 'anon-tracking-user';
@@ -33,13 +35,48 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'No events provided' }, { status: 400 });
     }
     
+    // Get authenticated user if available
+    const session = await getServerSession(authOptions);
+    const authenticatedUserId = session?.user?.id;
+    
     // Ensure anonymous user exists
     const anonymousUserId = await ensureAnonymousUser();
+    
+    // Create/update anonymous tracking profile for authenticated user if applicable
+    let anonymousId = null;
+    if (authenticatedUserId && events.some(e => e.metadata?.anonymousId)) {
+      // Extract anonymousId from events
+      anonymousId = events.find(e => e.metadata?.anonymousId)?.metadata?.anonymousId;
+      
+      if (anonymousId) {
+        try {
+          // Link anonymous profile to authenticated user
+          await prisma.anonymousTrackingProfile.upsert({
+            where: { anonymousId },
+            update: {
+              userId: authenticatedUserId,
+              lastSeen: new Date()
+            },
+            create: {
+              anonymousId,
+              userId: authenticatedUserId,
+              firstSeen: new Date(),
+              lastSeen: new Date(),
+              metadata: { source: 'event_tracking' }
+            }
+          });
+          
+          console.log(`Linked anonymous profile ${anonymousId} to user ${authenticatedUserId}`);
+        } catch (error) {
+          console.error('Error linking anonymous profile:', error);
+        }
+      }
+    }
 
     // Process and store events
     const processedEvents = events.map(event => ({
       id: event.id,
-      userId: event.userId || anonymousUserId, // Use anonymous user ID if no user ID provided
+      userId: authenticatedUserId || event.userId || anonymousUserId, // Prioritize session user
       sessionId: event.sessionId || 'unknown',
       eventCategory: event.eventCategory.toString(),
       eventType: event.eventType.toString(),
@@ -56,7 +93,8 @@ export async function POST(request: Request) {
         // Store the original session ID to help link events to users later
         trackingSessionId: event.sessionId,
         // Store anonymous flag to identify which events are from non-authenticated users
-        isAnonymous: !event.userId
+        isAnonymous: !authenticatedUserId && !event.userId,
+        anonymousId: event.metadata?.anonymousId
       },
       createdAt: new Date()
     }));

@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/nextauth';
+import { useSession } from 'next-auth/react';
 
 interface AuthRequiredProps {
   children: ReactNode;
@@ -10,13 +10,17 @@ interface AuthRequiredProps {
 }
 
 export default function AuthRequired({ children, redirectTo = '/auth/signin' }: AuthRequiredProps) {
-  const { user, isLoading } = useAuth();
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
+  const user = session?.user || null;
   const router = useRouter();
 
   useEffect(() => {
     // Only redirect after the auth check is complete and user is not authenticated
     if (!isLoading && !user) {
-      router.push(`${redirectTo}?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      // Add the current URL as a callback parameter so the user can be redirected back after login
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      router.push(`${redirectTo}${redirectTo.includes('?') ? '&' : '?'}callbackUrl=${callbackUrl}`);
     }
   }, [user, isLoading, router, redirectTo]);
 

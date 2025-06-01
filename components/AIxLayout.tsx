@@ -21,37 +21,26 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
       <header className="bg-[#140e26] text-white fixed top-0 w-full z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            {/* Logo and Brand */}
+            {/* Logo and Brand - Updated with external link */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center">
+              <a href="https://www.aixponential.org/" target="_blank" rel="noopener noreferrer" className="flex items-center">
                 <Image
                   src="/images/brand/Aix_darklogoLongForm.png"
-                  alt="AIxPromptCraft Logo"
+                  alt="AIxponential Logo"
                   width={120}
                   height={120}
                   className="w-auto"
                 />
-                <span className="ml-2 text-xl font-semibold text-gray-900 sm:hidden">
-                  AIxPromptCraft
-                </span>
-              </Link>
+              </a>
             </div>
 
-            {/* Main Navigation - Desktop */}
+            {/* Main Navigation - Desktop - Removed Test Gemini and PromptCraft Analyzer */}
             <nav className="hidden md:flex items-center space-x-8">
               <Link href="/" className="text-white hover:text-aixblue-600 font-medium transition duration-150">
                 Home
               </Link>
-              {user && (
-                <Link href="/promptcraft-analyzer" className="text-white hover:text-aixblue-600 font-medium transition duration-150">
-                  PromptCraft Analyzer
-                </Link>
-              )}
               <Link href="/example-prompts" className="text-white hover:text-aixblue-600 font-medium transition duration-150">
                 Examples
-              </Link>
-              <Link href="/example-prompts/test-gemini" className="text-white hover:text-aixblue-600 font-medium transition duration-150">
-                Test Gemini
               </Link>
               <Link href="/my-prompts" className="text-white hover:text-aixblue-600 font-medium transition duration-150">
                 My Prompts
@@ -90,7 +79,7 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
                 </div>
               ) : (
                 <button
-                  onClick={signIn}
+                  onClick={() => signIn()}
                   className="px-4 py-2 rounded-md bg-aixblue-600 text-white hover:bg-aixblue-700 transition-colors"
                 >
                   Sign In
@@ -119,58 +108,164 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* Footer - Updated to match AIxponential website */}
+      <footer className="bg-[#140e26] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center">
+          {/* Logo and mission statement */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="flex items-center justify-center md:justify-start">
+              <a href="https://www.aixponential.org/" target="_blank" rel="noopener noreferrer">
                 <Image
                   src="/images/brand/Aix_darklogoLongForm.png"
-                  alt="AIxPromptCraft"
-                  width={200}
-                  height={40}
+                  alt="AIxponential Logo"
+                  width={180}
+                  height={60}
                   className="w-auto"
                 />
-              </div>
-              <p className="mt-4 text-gray-400 text-sm">
-                Democratizing access to AI technologies and empowering individuals to leverage AI responsibly and effectively.
-              </p>
+              </a>
             </div>
-            
+            <div className="flex flex-col justify-center">
+              <blockquote className="border-l-4 border-white pl-4 italic text-white/80">
+                <p className="text-lg leading-tight">
+                  &quot;Democratizing access to AI technologies and empowering individuals and organizations
+                  to leverage AI responsibly and effectively.&quot;
+                </p>
+              </blockquote>
+            </div>
+          </div>
+          
+          {/* Navigation Sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">Initiatives</h3>
               <ul className="space-y-2">
-                <li><Link href="/resources" className="text-gray-400 hover:text-white transition duration-150">AI in Education</Link></li>
-                <li><Link href="/resources" className="text-gray-400 hover:text-white transition duration-150">AI Trustworthiness</Link></li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/initiatives/education" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    AI in Education
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/initiatives/trustworthiness" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    AI Trustworthiness
+                  </a>
+                </li>
               </ul>
             </div>
-
+            
             <div>
               <h3 className="text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
-                <li><Link href="/example-prompts" className="text-gray-400 hover:text-white transition duration-150">Prompting Course</Link></li>
-                <li><Link href="/resources" className="text-gray-400 hover:text-white transition duration-150">AI Tools</Link></li>
+                <li>
+                  <a 
+                    href="https://prompting-course-v3.vercel.app/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    Prompting Course
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/resources/podcasts" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    Podcast
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/resources/parent-resources" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    AI Tools
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Get Involved</h3>
               <ul className="space-y-2">
-                <li><Link href="#" className="text-gray-400 hover:text-white transition duration-150">Donate</Link></li>
-                <li><Link href="#" className="text-gray-400 hover:text-white transition duration-150">Volunteer</Link></li>
-                <li><Link href="#" className="text-gray-400 hover:text-white transition duration-150">Partnerships</Link></li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/get-involved" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    Donate
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/get-involved" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    Volunteer
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://www.aixponential.org/get-involved" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-white/80 hover:text-white transition"
+                  >
+                    Partnerships
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2023 AIxPromptCraft. All rights reserved.</p>
-            <div className="mt-4 md:mt-0 flex space-x-6">
-              <Link href="#" className="text-gray-400 hover:text-white">Terms</Link>
-              <Link href="#" className="text-gray-400 hover:text-white">Privacy</Link>
-              <Link href="#" className="text-gray-400 hover:text-white">Contact</Link>
+          <div className="pt-8 mt-8 border-t border-white/20 text-center">
+            <p className="text-white/70 text-sm">© {new Date().getFullYear()} AIxponential. All rights reserved.</p>
+            <div className="mt-3 text-white/70 text-sm">
+              <p>Contact:</p>
+              <a 
+                href="mailto:info@aixponential.org" 
+                className="text-white/80 hover:text-white transition"
+              >
+                info@aixponential.org
+              </a>
+              <span className="mx-2">|</span>
+              <a 
+                href="https://www.aixponential.org/contact" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white/80 hover:text-white transition"
+              >
+                Contact Form
+              </a>
             </div>
+            <p className="text-white/70 text-xs mt-3">
+              This work is licensed under a{' '}
+              <a 
+                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" 
+                className="text-white/80 hover:text-white transition" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+              </a>
+            </p>
           </div>
         </div>
       </footer>

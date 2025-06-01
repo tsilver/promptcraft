@@ -4,11 +4,13 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useSession } from 'next-auth/react';
 import AIxLayout from '@/components/AIxLayout';
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
+  const user = session?.user || null;
   const router = useRouter();
 
   // Redirect authenticated users to the PromptCraft Analyzer page

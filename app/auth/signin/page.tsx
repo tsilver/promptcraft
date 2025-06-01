@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import AIxLayout from '@/components/AIxLayout';
@@ -10,11 +10,17 @@ import AIxLayout from '@/components/AIxLayout';
 function SignInContent() {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get('callbackUrl') || '/';
+  const callbackUrl = searchParams?.get('callbackUrl') || '/promptcraft-analyzer';
+  const router = useRouter();
   
   const handleSignIn = async () => {
     setIsLoading(true);
-    await signIn('google', { callbackUrl });
+    try {
+      await signIn('google', { callbackUrl });
+    } catch (error) {
+      console.error('Error signing in:', error);
+      setIsLoading(false);
+    }
   };
 
   return (

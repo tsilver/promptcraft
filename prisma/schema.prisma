@@ -207,3 +207,23 @@ model LearningResource {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Example prompts for users to reference and use
+model ExamplePrompt {
+  id            String     @id @default(cuid())
+  title         String
+  text          String
+  category      String
+  gradeLevel    String
+  type          String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  useCount      Int        @default(0)
+  isActive      Boolean    @default(true)
+  
+  @@unique([title, category, type])
+  @@index([category])
+  @@index([gradeLevel])
+  @@index([type])
+  @@index([useCount])
+}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/nextauth';
 import AuthRequired from '@/components/AuthRequired';
 import AIxLayout from '@/components/AIxLayout';
 
@@ -33,7 +33,7 @@ export default function MyPrompts() {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/prompts?userId=${user.id}`);
+        const response = await fetch(`/api/prompts`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch prompts');

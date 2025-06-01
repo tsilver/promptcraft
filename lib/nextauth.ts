@@ -12,8 +12,8 @@ export function useAuth() {
   const isLoading = status === 'loading';
   const user = session?.user || null;
   
-  const signIn = async () => {
-    await nextAuthSignIn('google', { callbackUrl: '/promptcraft-analyzer' });
+  const signIn = async (callbackUrl = '/promptcraft-analyzer') => {
+    await nextAuthSignIn('google', { callbackUrl });
   };
   
   const signOut = async () => {

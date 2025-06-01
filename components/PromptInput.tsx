@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/nextauth';
 import { useEventTracking } from '@/lib/tracking/hooks';
 import { EventType, EventCategory } from '@/lib/tracking/types';
 import PromptEvaluation from './PromptEvaluation';
@@ -79,10 +80,7 @@ export default function PromptInput({ initialPrompt = null }: PromptInputProps) 
         const response = await fetch('/api/prompts/evaluate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            promptText,
-            userId: user.id
-          }),
+          body: JSON.stringify({ promptText }),
         });
         
         if (!response.ok) {
@@ -132,10 +130,7 @@ export default function PromptInput({ initialPrompt = null }: PromptInputProps) 
         const response = await fetch('/api/prompts/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            promptText,
-            userId: user.id
-          }),
+          body: JSON.stringify({ promptText }),
         });
         
         if (!response.ok) {
@@ -204,10 +199,7 @@ export default function PromptInput({ initialPrompt = null }: PromptInputProps) 
       const response = await fetch('/api/prompts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          promptText,
-          userId: user.id
-        }),
+        body: JSON.stringify({ promptText }),
       });
       
       if (!response.ok) {
@@ -237,6 +229,11 @@ export default function PromptInput({ initialPrompt = null }: PromptInputProps) 
     }
   };
   
+  const handleSignIn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    signIn();
+  };
+  
   return (
     <div className="space-y-4">
       {showLoginPrompt && !user && (
@@ -245,7 +242,7 @@ export default function PromptInput({ initialPrompt = null }: PromptInputProps) 
             {loginPromotionMessage}
           </p>
           <button
-            onClick={signIn}
+            onClick={handleSignIn}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
           >
             Sign In

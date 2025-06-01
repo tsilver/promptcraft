@@ -2,7 +2,6 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 import { EventTrackingProvider } from '@/lib/tracking/hooks';
-import { AuthProvider } from '@/lib/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 

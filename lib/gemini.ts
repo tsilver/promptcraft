@@ -53,15 +53,17 @@ export async function generateContent(prompt: string) {
 
 /**
  * Evaluates a prompt using the Gemini API
- * Returns structured evaluation data
+ * Returns structured evaluation data based on the TEACH framework
  */
 export async function evaluatePrompt(promptText: string) {
   const evaluationPrompt = `
-You are an AI Prompt Engineering expert. Please evaluate the following prompt based on these criteria:
-1. Tone & Persona: Is the tone clear and appropriate? Is there a specific persona defined?
-2. Task Clarity: Is the task or request clearly specified?
-3. Format & Output: Are format requirements and output expectations clear?
-4. Context & Background: Is sufficient context or background information provided?
+You are an AI Prompt Engineering expert. Please evaluate the following prompt based on the TEACH framework criteria:
+
+1. T - Tone and Persona: Is the tone clear and appropriate? Is there a specific persona defined for the AI?
+2. E - Explicit Task: Is the task or request clearly specified with specific actions for the AI to perform?
+3. A - Arrangement of Output: Are format requirements and output structure clearly specified?
+4. C - Context and Constraints: Is sufficient context, background information, or constraints provided?
+5. H - Higher Level Refinements: Are there advanced techniques like examples, chain-of-thought, or verification steps?
 
 For each criterion, provide:
 - A score: "Excellent", "Good", "Needs Improvement", or "Poor"
@@ -73,19 +75,28 @@ FORMAT YOUR RESPONSE AS JSON:
 {
   "tonePersona": {
     "score": "score here",
-    "feedback": "feedback here"
+    "feedback": "feedback here",
+    "learnMoreUrl": "https://prompting-course-v3.vercel.app/course/teach-framework/tone-persona"
   },
-  "taskClarity": {
+  "explicitTask": {
     "score": "score here",
-    "feedback": "feedback here"
+    "feedback": "feedback here",
+    "learnMoreUrl": "https://prompting-course-v3.vercel.app/course/teach-framework/explicit-task"
   },
-  "formatOutput": {
+  "arrangementOutput": {
     "score": "score here",
-    "feedback": "feedback here"
+    "feedback": "feedback here",
+    "learnMoreUrl": "https://prompting-course-v3.vercel.app/course/teach-framework/arrangement"
   },
-  "contextBackground": {
+  "contextConstraints": {
     "score": "score here",
-    "feedback": "feedback here"
+    "feedback": "feedback here",
+    "learnMoreUrl": "https://prompting-course-v3.vercel.app/course/teach-framework/context"
+  },
+  "higherLevelRefinements": {
+    "score": "score here",
+    "feedback": "feedback here",
+    "learnMoreUrl": "https://prompting-course-v3.vercel.app/course/teach-framework/higher-level"
   },
   "suggestedRefinements": ["suggestion 1", "suggestion 2", "suggestion 3"]
 }

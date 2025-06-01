@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useSession } from 'next-auth/react';
 import { useEventTracking } from '@/lib/tracking/hooks';
 import { EventType, EventCategory } from '@/lib/tracking/types';
 import AIxLayout from '@/components/AIxLayout';
@@ -10,7 +10,8 @@ import PromptInput from '@/components/PromptInput';
 import AuthRequired from '@/components/AuthRequired';
 
 export default function PromptCraftAnalyzerPage() {
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user || null;
   const router = useRouter();
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
   

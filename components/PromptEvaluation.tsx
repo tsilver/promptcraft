@@ -1,18 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
-// Define the evaluation data structure
+// Define the evaluation data structure based on TEACH framework
 interface EvaluationCriterion {
   score: string;
   feedback: string;
+  learnMoreUrl?: string;
 }
 
 interface EvaluationData {
   tonePersona: EvaluationCriterion;
-  taskClarity: EvaluationCriterion;
-  formatOutput: EvaluationCriterion;
-  contextBackground: EvaluationCriterion;
+  explicitTask: EvaluationCriterion;
+  arrangementOutput: EvaluationCriterion;
+  contextConstraints: EvaluationCriterion;
+  higherLevelRefinements: EvaluationCriterion;
   suggestedRefinements: string[];
 }
 
@@ -66,7 +69,10 @@ export default function PromptEvaluation({ evaluation, isLoading }: PromptEvalua
   return (
     <div className="mt-8 border rounded-lg bg-white shadow-sm overflow-hidden">
       <div className="bg-gray-50 border-b p-4">
-        <h2 className="text-xl font-semibold">Prompt Evaluation</h2>
+        <h2 className="text-xl font-semibold">Prompt Evaluation - TEACH Framework</h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Evaluation based on the TEACH Prompting Framework for educators
+        </p>
       </div>
       
       {/* Tabs */}
@@ -102,67 +108,143 @@ export default function PromptEvaluation({ evaluation, isLoading }: PromptEvalua
               <div 
                 className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.tonePersona.score)}`}
               >
-                Tone: {evaluation.tonePersona.score}
+                T - Tone: {evaluation.tonePersona.score}
               </div>
               <div 
-                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.taskClarity.score)}`}
+                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.explicitTask.score)}`}
               >
-                Task Clarity: {evaluation.taskClarity.score}
+                E - Task: {evaluation.explicitTask.score}
               </div>
               <div 
-                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.formatOutput.score)}`}
+                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.arrangementOutput.score)}`}
               >
-                Format: {evaluation.formatOutput.score}
+                A - Arrangement: {evaluation.arrangementOutput.score}
               </div>
               <div 
-                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.contextBackground.score)}`}
+                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.contextConstraints.score)}`}
               >
-                Context: {evaluation.contextBackground.score}
+                C - Context: {evaluation.contextConstraints.score}
+              </div>
+              <div 
+                className={`px-3 py-1 text-sm font-medium rounded-full ${getBadgeColor(evaluation.higherLevelRefinements.score)}`}
+              >
+                H - Higher Level: {evaluation.higherLevelRefinements.score}
               </div>
             </div>
             
-            {/* Tone & Persona */}
+            {/* T - Tone & Persona */}
             <div className="border border-gray-100 rounded-md p-4 hover:bg-gray-50">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-medium">Tone & Persona</h3>
-                <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.tonePersona.score)}`}>
-                  {evaluation.tonePersona.score}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium">T - Tone & Persona</h3>
+                  <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.tonePersona.score)}`}>
+                    {evaluation.tonePersona.score}
+                  </span>
+                </div>
+                {evaluation.tonePersona.learnMoreUrl && (
+                  <a 
+                    href={evaluation.tonePersona.learnMoreUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Learn more →
+                  </a>
+                )}
               </div>
               <p className="text-gray-600">{evaluation.tonePersona.feedback}</p>
             </div>
             
-            {/* Task Clarity */}
+            {/* E - Explicit Task */}
             <div className="border border-gray-100 rounded-md p-4 hover:bg-gray-50">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-medium">Task Clarity</h3>
-                <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.taskClarity.score)}`}>
-                  {evaluation.taskClarity.score}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium">E - Explicit Task</h3>
+                  <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.explicitTask.score)}`}>
+                    {evaluation.explicitTask.score}
+                  </span>
+                </div>
+                {evaluation.explicitTask.learnMoreUrl && (
+                  <a 
+                    href={evaluation.explicitTask.learnMoreUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Learn more →
+                  </a>
+                )}
               </div>
-              <p className="text-gray-600">{evaluation.taskClarity.feedback}</p>
+              <p className="text-gray-600">{evaluation.explicitTask.feedback}</p>
             </div>
             
-            {/* Format & Output */}
+            {/* A - Arrangement of Output */}
             <div className="border border-gray-100 rounded-md p-4 hover:bg-gray-50">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-medium">Format & Output Specification</h3>
-                <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.formatOutput.score)}`}>
-                  {evaluation.formatOutput.score}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium">A - Arrangement of Output</h3>
+                  <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.arrangementOutput.score)}`}>
+                    {evaluation.arrangementOutput.score}
+                  </span>
+                </div>
+                {evaluation.arrangementOutput.learnMoreUrl && (
+                  <a 
+                    href={evaluation.arrangementOutput.learnMoreUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Learn more →
+                  </a>
+                )}
               </div>
-              <p className="text-gray-600">{evaluation.formatOutput.feedback}</p>
+              <p className="text-gray-600">{evaluation.arrangementOutput.feedback}</p>
             </div>
             
-            {/* Context & Background */}
+            {/* C - Context & Constraints */}
             <div className="border border-gray-100 rounded-md p-4 hover:bg-gray-50">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-medium">Context & Background</h3>
-                <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.contextBackground.score)}`}>
-                  {evaluation.contextBackground.score}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium">C - Context & Constraints</h3>
+                  <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.contextConstraints.score)}`}>
+                    {evaluation.contextConstraints.score}
+                  </span>
+                </div>
+                {evaluation.contextConstraints.learnMoreUrl && (
+                  <a 
+                    href={evaluation.contextConstraints.learnMoreUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Learn more →
+                  </a>
+                )}
               </div>
-              <p className="text-gray-600">{evaluation.contextBackground.feedback}</p>
+              <p className="text-gray-600">{evaluation.contextConstraints.feedback}</p>
+            </div>
+            
+            {/* H - Higher Level Refinements */}
+            <div className="border border-gray-100 rounded-md p-4 hover:bg-gray-50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium">H - Higher Level Refinements</h3>
+                  <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(evaluation.higherLevelRefinements.score)}`}>
+                    {evaluation.higherLevelRefinements.score}
+                  </span>
+                </div>
+                {evaluation.higherLevelRefinements.learnMoreUrl && (
+                  <a 
+                    href={evaluation.higherLevelRefinements.learnMoreUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Learn more →
+                  </a>
+                )}
+              </div>
+              <p className="text-gray-600">{evaluation.higherLevelRefinements.feedback}</p>
             </div>
           </div>
         )}

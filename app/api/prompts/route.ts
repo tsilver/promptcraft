@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth-options';
+import { generateUniquePromptId } from '@/lib/utils';
 import type { User } from '@prisma/client';
 
 // GET - Retrieve user's prompts
 export async function GET(request: Request) {
-  // Get the user ID from the query parameters
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('userId');
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+  // Get the user from the session
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Please sign in' },
+      { status: 401 }
+    );
   }
+  
+  const userId = session.user.id;
   
   try {
     // Retrieve the user's prompts
@@ -50,32 +56,33 @@ export async function GET(request: Request) {
 // POST - Create a new prompt
 export async function POST(request: Request) {
   try {
-    const { promptText, userId } = await request.json();
+    const { promptText } = await request.json();
     
-    if (!promptText || !userId) {
+    if (!promptText) {
       return NextResponse.json(
-        { error: 'Prompt text and user ID are required' },
+        { error: 'Prompt text is required' },
         { status: 400 }
       );
     }
     
-    // Check if the user exists
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    
-    if (!user) {
+    // Get the user from the session
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Unauthorized - Please sign in' },
+        { status: 401 }
       );
     }
+    
+    const userId = session.user.id;
+    
+    // Generate a unique ID for the prompt
+    const uniquePromptId = generateUniquePromptId(userId);
     
     // Create the prompt
     const prompt = await prisma.prompt.create({
       data: {
+        id: uniquePromptId,
         promptText,
         userId,
       },

@@ -32,7 +32,7 @@ export default function MobileNav() {
         </svg>
       </button>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Removed PromptCraft Analyzer and Test Gemini */}
       {isOpen && (
         <div className="absolute top-16 inset-x-0 z-50 bg-white shadow-lg border-b border-gray-200 py-3">
           <div className="px-4 space-y-3">
@@ -43,28 +43,12 @@ export default function MobileNav() {
             >
               Home
             </Link>
-            {user && (
-              <Link 
-                href="/promptcraft-analyzer"
-                className="block py-2 text-gray-700 hover:text-aixblue-600 font-medium"
-                onClick={() => setIsOpen(false)}
-              >
-                PromptCraft Analyzer
-              </Link>
-            )}
             <Link 
               href="/example-prompts"
               className="block py-2 text-gray-700 hover:text-aixblue-600 font-medium"
               onClick={() => setIsOpen(false)}
             >
               Examples
-            </Link>
-            <Link 
-              href="/example-prompts/test-gemini"
-              className="block py-2 text-gray-700 hover:text-aixblue-600 font-medium"
-              onClick={() => setIsOpen(false)}
-            >
-              Test Gemini
             </Link>
             <Link 
               href="/my-prompts"
