@@ -8,6 +8,13 @@ declare module "next-auth" {
     user: {
       /** The user's ID. */
       id: string;
+      /** The user's roles from STS. */
+      roles?: string[];
     } & DefaultSession["user"];
+  }
+
+  interface JWT {
+    /** The user's roles from STS. */
+    roles?: string[];
   }
 } 

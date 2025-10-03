@@ -5,14 +5,34 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/nextauth';
+import { getPrimaryRole, isAdmin } from '@/lib/sts';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoading, signIn, signOut } = useAuth();
   
+  const userRoles = user?.roles || [];
+  const primaryRole = getPrimaryRole(userRoles);
+  const userIsAdmin = isAdmin(userRoles);
+  
   const handleSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
     signIn();
+  };
+
+  const RoleBadge = ({ role }: { role: string }) => {
+    const isAdminRole = role === 'admin';
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          isAdminRole
+            ? 'bg-red-100 text-red-800'
+            : 'bg-blue-100 text-blue-800'
+        }`}
+      >
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </span>
+    );
   };
   
   return (
@@ -59,7 +79,10 @@ export default function Header() {
             </nav>
           </div>
           
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+            {user && userRoles.length > 0 && (
+              <RoleBadge role={primaryRole} />
+            )}
             {isLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : user ? (
@@ -102,6 +125,11 @@ export default function Header() {
                     >
                       <div className="font-medium">{user.name}</div>
                       <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                      {userRoles.length > 0 && (
+                        <div className="mt-1">
+                          <RoleBadge role={primaryRole} />
+                        </div>
+                      )}
                     </div>
                     <Link
                       href="/my-prompts"
@@ -238,6 +266,11 @@ export default function Header() {
                 <div className="ml-3">
                   <div className="text-base font-medium text-gray-800">{user.name}</div>
                   <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                  {userRoles.length > 0 && (
+                    <div className="mt-1">
+                      <RoleBadge role={primaryRole} />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="mt-3 space-y-1">

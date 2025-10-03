@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import prisma from "./prisma";
+import { exchangeTokenForRoles } from "./sts";
 
 // Configuration for NextAuth
 export const authOptions: NextAuthOptions = {
@@ -14,12 +15,24 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session?.user && token.sub) {
         session.user.id = token.sub;
+        session.user.roles = token.roles;
       }
       return session;
     },
     jwt: async ({ token, account, profile }) => {
       if (account) {
         token.accessToken = account.access_token;
+        
+        // Exchange Google ID token for STS roles
+        if (account.id_token) {
+          try {
+            const roles = await exchangeTokenForRoles(account.id_token);
+            token.roles = roles || [];
+          } catch (error) {
+            console.error('Failed to fetch user roles from STS:', error);
+            token.roles = [];
+          }
+        }
       }
       return token;
     },

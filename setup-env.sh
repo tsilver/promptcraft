@@ -12,12 +12,17 @@ NEXTAUTH_SECRET=$(openssl rand -base64 32)
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+# STS (Secure Token Service) Settings
+STS_URL=http://localhost:3000
+STS_CLIENT_ID=demo_client
+
 # Database Settings (already existing in your app)
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/promptcraft?schema=public"
 EOL
 
 echo "Created .env.local file with placeholder values"
 echo "Please update GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET with your actual credentials"
+echo "Update STS_URL if your Secure Token Service is running on a different URL"
 echo ""
 echo "Instructions for obtaining Google OAuth credentials:"
 echo "1. Go to https://console.cloud.google.com/"
