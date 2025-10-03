@@ -67,7 +67,7 @@ export default function Header() {
                 href="/my-prompts"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                My Prompts
+                My Prompts 3
               </Link>
               <Link
                 href="/example-prompts"
@@ -91,8 +91,18 @@ export default function Header() {
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Always show debug info */}
+            <div className="flex items-center space-x-2 bg-blue-100 p-2 rounded border-2 border-blue-500">
+              <span className="text-xs font-bold text-blue-800">
+                DEBUG: User={user ? 'EXISTS' : 'NULL'} Loading={isLoading ? 'YES' : 'NO'} Roles={JSON.stringify(userRoles)}
+              </span>
+            </div>
+            
             {user && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 bg-red-100 p-2 rounded">
+                <span className="text-xs font-bold text-red-800">
+                  USER EXISTS: Roles={JSON.stringify(userRoles)} Length={userRoles.length}
+                </span>
                 {userRoles.length > 0 ? (
                   <RoleBadge role={primaryRole} />
                 ) : (
@@ -100,13 +110,9 @@ export default function Header() {
                     Loading roles...
                   </span>
                 )}
-                <span className="text-xs text-gray-400">
-                  ({userRoles.length} roles)
-                </span>
                 <button
                   onClick={() => updateSession()}
                   className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded hover:bg-yellow-200"
-                  title="Refresh session to update roles"
                 >
                   🔄 Refresh
                 </button>
@@ -180,7 +186,7 @@ export default function Header() {
                       role="menuitem"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      My Prompts
+                      My Prompts 1
                     </Link>
                     <button
                       onClick={() => {
@@ -262,7 +268,7 @@ export default function Header() {
             className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
             onClick={() => setIsMenuOpen(false)}
           >
-            My Prompts
+            My Prompts 2
           </Link>
           <Link
             href="/example-prompts"

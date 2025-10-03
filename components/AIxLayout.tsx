@@ -4,6 +4,8 @@ import React, { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/nextauth';
+import { useSession } from 'next-auth/react';
+import { getPrimaryRole, isAdmin } from '@/lib/sts';
 import MobileNav from './MobileNav';
 
 interface AIxLayoutProps {
@@ -14,6 +16,32 @@ interface AIxLayoutProps {
 
 export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps) {
   const { user, signIn, signOut, isLoading } = useAuth();
+  const { data: rawSession, update: updateSession } = useSession();
+  
+  const userRoles = user?.roles || [];
+  const primaryRole = getPrimaryRole(userRoles);
+  const userIsAdmin = isAdmin(userRoles);
+
+  // Debug logging for role display
+  console.log('🎭 AIXLAYOUT: User object:', user);
+  console.log('🎭 AIXLAYOUT: User roles:', userRoles);
+  console.log('🎭 AIXLAYOUT: Primary role:', primaryRole);
+  console.log('🎭 AIXLAYOUT: Raw session:', rawSession);
+
+  const RoleBadge = ({ role }: { role: string }) => {
+    const isAdminRole = role === 'admin';
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          isAdminRole
+            ? 'bg-red-100 text-red-800'
+            : 'bg-blue-100 text-blue-800'
+        }`}
+      >
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -54,7 +82,29 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
             <MobileNav />
 
             {/* Auth Buttons - Desktop */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center space-x-4">
+              {/* Always show debug info */}
+              <div className="flex items-center space-x-2 bg-blue-100 p-2 rounded border-2 border-blue-500">
+                <span className="text-xs font-bold text-blue-800">
+                  AIXLAYOUT DEBUG: User={user ? 'EXISTS' : 'NULL'} Loading={isLoading ? 'YES' : 'NO'} Roles={JSON.stringify(userRoles)}
+                </span>
+              </div>
+              
+              {user && userRoles.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  <RoleBadge role={primaryRole} />
+                  <span className="text-xs text-white/70">
+                    ({userRoles.length} roles)
+                  </span>
+                  <button
+                    onClick={() => updateSession()}
+                    className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded hover:bg-yellow-200"
+                  >
+                    🔄 Refresh
+                  </button>
+                </div>
+              )}
+              
               {isLoading ? (
                 <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
               ) : user ? (
@@ -82,7 +132,7 @@ export default function AIxLayout({ children, title, subtitle }: AIxLayoutProps)
                   onClick={() => signIn()}
                   className="px-4 py-2 rounded-md bg-aixblue-600 text-white hover:bg-aixblue-700 transition-colors"
                 >
-                  Sign In
+                  Sign In with Google
                 </button>
               )}
             </div>
