@@ -13,26 +13,48 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     session: async ({ session, token }) => {
+      console.log('🔄 AUTH: Session callback triggered');
+      console.log('🔄 AUTH: Token roles:', token.roles);
+      
       if (session?.user && token.sub) {
         session.user.id = token.sub;
-        session.user.roles = token.roles;
+        session.user.roles = token.roles as string[] | undefined;
+        
+        console.log('✅ AUTH: Session updated with roles:', session.user.roles);
+        console.log('✅ AUTH: Complete session user:', {
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email,
+          roles: session.user.roles
+        });
       }
       return session;
     },
     jwt: async ({ token, account, profile }) => {
+      console.log('🔄 AUTH: JWT callback triggered');
+      console.log('🔄 AUTH: Account present:', !!account);
+      console.log('🔄 AUTH: ID token present:', !!account?.id_token);
+      
       if (account) {
         token.accessToken = account.access_token;
         
         // Exchange Google ID token for STS roles
         if (account.id_token) {
+          console.log('🔄 AUTH: Starting STS token exchange...');
           try {
             const roles = await exchangeTokenForRoles(account.id_token);
-            token.roles = roles || [];
+            token.roles = roles || [] as string[];
+            console.log('✅ AUTH: STS exchange completed, roles assigned to token:', token.roles);
           } catch (error) {
-            console.error('Failed to fetch user roles from STS:', error);
-            token.roles = [];
+            console.error('❌ AUTH: Failed to fetch user roles from STS:', error);
+            token.roles = [] as string[];
           }
+        } else {
+          console.log('⚠️ AUTH: No ID token available for STS exchange');
+          token.roles = [] as string[];
         }
+      } else {
+        console.log('🔄 AUTH: No account in JWT callback, keeping existing token roles:', token.roles);
       }
       return token;
     },

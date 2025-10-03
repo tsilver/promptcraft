@@ -34,6 +34,11 @@ export async function exchangeTokenForRoles(googleIdToken: string): Promise<stri
     const stsUrl = process.env.STS_URL || 'http://localhost:3000';
     const clientId = process.env.STS_CLIENT_ID || 'demo_client';
     
+    console.log('🔄 STS: Starting token exchange...');
+    console.log('🔄 STS URL:', stsUrl);
+    console.log('🔄 STS Client ID:', clientId);
+    console.log('🔄 Google ID Token (first 50 chars):', googleIdToken.substring(0, 50) + '...');
+    
     const requestBody = new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
       client_id: clientId,
@@ -41,6 +46,8 @@ export async function exchangeTokenForRoles(googleIdToken: string): Promise<stri
       subject_token_type: 'urn:ietf:params:oauth:token-type:id_token',
       requested_token_type: 'urn:ietf:params:oauth:token-type:id_token'
     });
+
+    console.log('🔄 STS: Making request to:', `${stsUrl}/token`);
 
     const response = await fetch(`${stsUrl}/token`, {
       method: 'POST',
@@ -50,19 +57,32 @@ export async function exchangeTokenForRoles(googleIdToken: string): Promise<stri
       body: requestBody.toString(),
     });
 
+    console.log('🔄 STS: Response status:', response.status);
+
     if (!response.ok) {
-      console.error('STS token exchange failed:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('❌ STS token exchange failed:', response.status, response.statusText);
+      console.error('❌ STS error response:', errorText);
       return null;
     }
 
     const tokenResponse: STSTokenResponse = await response.json();
+    console.log('✅ STS: Token response received');
+    console.log('✅ STS: Access token (first 50 chars):', tokenResponse.access_token.substring(0, 50) + '...');
     
     // Decode the JWT to extract roles
     const roleToken = decodeJWT(tokenResponse.access_token) as RoleToken;
     
-    return roleToken.roles || [];
+    if (roleToken) {
+      console.log('✅ STS: Decoded JWT payload:', roleToken);
+      console.log('🎭 STS: Extracted roles:', roleToken.roles);
+      return roleToken.roles || [];
+    } else {
+      console.error('❌ STS: Failed to decode JWT token');
+      return null;
+    }
   } catch (error) {
-    console.error('Error exchanging token for roles:', error);
+    console.error('❌ STS: Error exchanging token for roles:', error);
     return null;
   }
 }

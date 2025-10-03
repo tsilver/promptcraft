@@ -4,16 +4,27 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useAuth } from '@/lib/nextauth';
 import { getPrimaryRole, isAdmin } from '@/lib/sts';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoading, signIn, signOut } = useAuth();
+  const { data: rawSession, update: updateSession } = useSession();
   
   const userRoles = user?.roles || [];
   const primaryRole = getPrimaryRole(userRoles);
   const userIsAdmin = isAdmin(userRoles);
+
+  // Debug logging for role display
+  console.log('🎭 HEADER: User object:', user);
+  console.log('🎭 HEADER: User roles:', userRoles);
+  console.log('🎭 HEADER: Primary role:', primaryRole);
+  console.log('🎭 HEADER: Is admin:', userIsAdmin);
+  console.log('🎭 HEADER: Raw session:', rawSession);
+  console.log('🎭 HEADER: Raw session user:', rawSession?.user);
+  console.log('🎭 HEADER: Raw session roles:', rawSession?.user?.roles);
   
   const handleSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -79,9 +90,27 @@ export default function Header() {
             </nav>
           </div>
           
-          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
-            {user && userRoles.length > 0 && (
-              <RoleBadge role={primaryRole} />
+          <div className="flex items-center space-x-4">
+            {user && (
+              <div className="flex items-center space-x-2">
+                {userRoles.length > 0 ? (
+                  <RoleBadge role={primaryRole} />
+                ) : (
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    Loading roles...
+                  </span>
+                )}
+                <span className="text-xs text-gray-400">
+                  ({userRoles.length} roles)
+                </span>
+                <button
+                  onClick={() => updateSession()}
+                  className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded hover:bg-yellow-200"
+                  title="Refresh session to update roles"
+                >
+                  🔄 Refresh
+                </button>
+              </div>
             )}
             {isLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
@@ -125,11 +154,25 @@ export default function Header() {
                     >
                       <div className="font-medium">{user.name}</div>
                       <div className="text-xs text-gray-500 truncate">{user.email}</div>
-                      {userRoles.length > 0 && (
-                        <div className="mt-1">
-                          <RoleBadge role={primaryRole} />
+                      <div className="mt-1 flex flex-col space-y-1">
+                        {userRoles.length > 0 ? (
+                          <>
+                            <RoleBadge role={primaryRole} />
+                            {userRoles.length > 1 && (
+                              <div className="text-xs text-gray-400">
+                                +{userRoles.length - 1} more roles
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
+                            No roles assigned
+                          </span>
+                        )}
+                        <div className="text-xs text-gray-400">
+                          Debug: {JSON.stringify(userRoles)}
                         </div>
-                      )}
+                      </div>
                     </div>
                     <Link
                       href="/my-prompts"

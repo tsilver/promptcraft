@@ -12,6 +12,12 @@ export function useAuth() {
   const isLoading = status === 'loading';
   const user = session?.user || null;
   
+  // Debug logging for client-side session
+  console.log('🔍 CLIENT: useAuth session data:', session);
+  console.log('🔍 CLIENT: useAuth user:', user);
+  console.log('🔍 CLIENT: useAuth user roles:', user?.roles);
+  console.log('🔍 CLIENT: useAuth status:', status);
+  
   const signIn = async (callbackUrl = '/promptcraft-analyzer') => {
     await nextAuthSignIn('google', { callbackUrl });
   };
