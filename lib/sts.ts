@@ -31,8 +31,8 @@ interface RoleToken {
  */
 export async function exchangeTokenForRoles(googleIdToken: string): Promise<string[] | null> {
   try {
-    const stsUrl = process.env.STS_URL || 'http://localhost:3000';
-    const clientId = process.env.STS_CLIENT_ID || 'demo_client';
+    const stsUrl = process.env.STS_URL || 'https://authena-700866776461.us-central1.run.app';
+    const clientId = process.env.STS_CLIENT_ID || 'promptcraft';
     
     console.log('🔄 STS: Starting token exchange...');
     console.log('🔄 STS URL:', stsUrl);

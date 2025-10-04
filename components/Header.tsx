@@ -4,46 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useAuth } from '@/lib/nextauth';
-import { getPrimaryRole, isAdmin } from '@/lib/sts';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoading, signIn, signOut } = useAuth();
-  const { data: rawSession, update: updateSession } = useSession();
-  
-  const userRoles = user?.roles || [];
-  const primaryRole = getPrimaryRole(userRoles);
-  const userIsAdmin = isAdmin(userRoles);
-
-  // Debug logging for role display
-  console.log('🎭 HEADER: User object:', user);
-  console.log('🎭 HEADER: User roles:', userRoles);
-  console.log('🎭 HEADER: Primary role:', primaryRole);
-  console.log('🎭 HEADER: Is admin:', userIsAdmin);
-  console.log('🎭 HEADER: Raw session:', rawSession);
-  console.log('🎭 HEADER: Raw session user:', rawSession?.user);
-  console.log('🎭 HEADER: Raw session roles:', rawSession?.user?.roles);
   
   const handleSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
     signIn();
-  };
-
-  const RoleBadge = ({ role }: { role: string }) => {
-    const isAdminRole = role === 'admin';
-    return (
-      <span
-        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-          isAdminRole
-            ? 'bg-red-100 text-red-800'
-            : 'bg-blue-100 text-blue-800'
-        }`}
-      >
-        {role.charAt(0).toUpperCase() + role.slice(1)}
-      </span>
-    );
   };
   
   return (
@@ -67,7 +36,7 @@ export default function Header() {
                 href="/my-prompts"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                My Prompts 3
+                My Prompts
               </Link>
               <Link
                 href="/example-prompts"
@@ -90,34 +59,7 @@ export default function Header() {
             </nav>
           </div>
           
-          <div className="flex items-center space-x-4">
-            {/* Always show debug info */}
-            <div className="flex items-center space-x-2 bg-blue-100 p-2 rounded border-2 border-blue-500">
-              <span className="text-xs font-bold text-blue-800">
-                DEBUG: User={user ? 'EXISTS' : 'NULL'} Loading={isLoading ? 'YES' : 'NO'} Roles={JSON.stringify(userRoles)}
-              </span>
-            </div>
-            
-            {user && (
-              <div className="flex items-center space-x-2 bg-red-100 p-2 rounded">
-                <span className="text-xs font-bold text-red-800">
-                  USER EXISTS: Roles={JSON.stringify(userRoles)} Length={userRoles.length}
-                </span>
-                {userRoles.length > 0 ? (
-                  <RoleBadge role={primaryRole} />
-                ) : (
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    Loading roles...
-                  </span>
-                )}
-                <button
-                  onClick={() => updateSession()}
-                  className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded hover:bg-yellow-200"
-                >
-                  🔄 Refresh
-                </button>
-              </div>
-            )}
+          <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {isLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : user ? (
@@ -160,25 +102,6 @@ export default function Header() {
                     >
                       <div className="font-medium">{user.name}</div>
                       <div className="text-xs text-gray-500 truncate">{user.email}</div>
-                      <div className="mt-1 flex flex-col space-y-1">
-                        {userRoles.length > 0 ? (
-                          <>
-                            <RoleBadge role={primaryRole} />
-                            {userRoles.length > 1 && (
-                              <div className="text-xs text-gray-400">
-                                +{userRoles.length - 1} more roles
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
-                            No roles assigned
-                          </span>
-                        )}
-                        <div className="text-xs text-gray-400">
-                          Debug: {JSON.stringify(userRoles)}
-                        </div>
-                      </div>
                     </div>
                     <Link
                       href="/my-prompts"
@@ -186,7 +109,7 @@ export default function Header() {
                       role="menuitem"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      My Prompts 1
+                      My Prompts
                     </Link>
                     <button
                       onClick={() => {
@@ -268,7 +191,7 @@ export default function Header() {
             className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
             onClick={() => setIsMenuOpen(false)}
           >
-            My Prompts 2
+            My Prompts
           </Link>
           <Link
             href="/example-prompts"
@@ -315,11 +238,6 @@ export default function Header() {
                 <div className="ml-3">
                   <div className="text-base font-medium text-gray-800">{user.name}</div>
                   <div className="text-sm font-medium text-gray-500">{user.email}</div>
-                  {userRoles.length > 0 && (
-                    <div className="mt-1">
-                      <RoleBadge role={primaryRole} />
-                    </div>
-                  )}
                 </div>
               </div>
               <div className="mt-3 space-y-1">
